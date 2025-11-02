@@ -358,6 +358,20 @@ HOOKBODY({
 	return 0; // errSecSuccess
 })
 
+static OSStatus (*original_SecTrustGetTrustResult)(SecTrustRef trust, SecTrustResultType *result);
+static OSStatus replaced_SecTrustGetTrustResult(SecTrustRef trust, SecTrustResultType *result)
+HOOKBODY({
+    OSStatus res = original_SecTrustGetTrustResult(trust, result);
+    UNUSED (res);
+    SSKVerboseLog("Overrided SecTrustGetTrustResult!");
+    if (result) {
+        SSKVerboseLog("Overrided SecTrustGetTrustResult() = %d, original result %d -> kSecTrustResultUnspecified(4)", res, *result);
+        // Actually, this certificate chain is trusted
+        *result = kSecTrustResultUnspecified;
+    }
+	return 0; // errSecSuccess
+})
+
 static OSStatus (*original_SecTrustSetPolicies)(SecTrustRef trust, void* policies);
 static OSStatus replaced_SecTrustSetPolicies(SecTrustRef trust, void* policies)
 HOOKBODY({
@@ -657,6 +671,7 @@ __attribute__((constructor)) static void init(int argc, const char **argv)
         hookF(NULL, "SecTrustEvaluateWithError",(void *)  replaced_SecTrustEvaluateWithError, (void **) &original_SecTrustEvaluateWithError);
         hookF(NULL, "SecTrustEvaluateAsyncWithError",(void *)  replaced_SecTrustEvaluateAsyncWithError, (void **) &original_SecTrustEvaluateAsyncWithError);
         hookF(NULL, "SecTrustEvaluateFastAsync",(void *)  replaced_SecTrustEvaluateFastAsync, (void **) &original_SecTrustEvaluateFastAsync);
+        hookF(NULL, "SecTrustGetTrustResult",(void *)  replaced_SecTrustGetTrustResult, (void **) &original_SecTrustGetTrustResult);
         // SecTrustEvaluateWithError iOS 6-
         hookF(NULL, "SecTrustSetPolicies",(void *)  replaced_SecTrustSetPolicies, (void **) &original_SecTrustSetPolicies);
         // SecKeyVerifySignature iOS 10-
