@@ -365,9 +365,8 @@ HOOKBODY({
     UNUSED (res);
     SSKVerboseLog("Overrided SecTrustGetTrustResult!");
     if (result) {
-        SSKVerboseLog("Overrided SecTrustGetTrustResult() = %d, original result %d -> kSecTrustResultUnspecified(4)", res, *result);
-        // Actually, this certificate chain is trusted
-        *result = kSecTrustResultUnspecified;
+        SSKVerboseLog("Overrided SecTrustGetTrustResult() = %d, original result %d -> 1", res, *result);
+        *result = 1;
     }
 	return 0; // errSecSuccess
 })
